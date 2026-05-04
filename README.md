@@ -2,7 +2,7 @@
 
 # TaskFlow Cloud Pipeline
 
-### CS437 Cloud Development - Programming Assignment 4
+### CS487 Cloud Development - Programming Assignment 4
 
 <img alt="Azure" src="https://img.shields.io/badge/Azure-App%20Service%20%7C%20Functions%20%7C%20AKS%20%7C%20ACI-7c3aed?style=for-the-badge">
 <img alt="Submission" src="https://img.shields.io/badge/Submission-GitHub%20Only-10b981?style=for-the-badge">
