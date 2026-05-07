@@ -107,7 +107,7 @@ Description: This screenshot shows the Azure Function App container configuratio
 
 ### Evidence 4.2: Orchestration Smoke Test
 
-TODO: ![alt text]docs/(4.2.png)
+TODO: ![alt text](docs/4.2.png)
 
 Description: This screenshot shows a successful orchestration smoke test performed using the Durable Functions HTTP starter endpoint. The returned orchestration instance ID and status polling URLs confirm that the Durable Functions runtime successfully started and registered the orchestration workflow.
 
