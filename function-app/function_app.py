@@ -1,9 +1,13 @@
+print("FUNCTION_APP MODULE IMPORT START")
 import azure.functions as func
 import azure.durable_functions as df
 import os, json, time, requests
 
-app = df.DFApp(http_auth_level=func.AuthLevel.FUNCTION)
+# app = df.DFApp(http_auth_level=func.AuthLevel.FUNCTION)
+app = df.DFApp(http_auth_level=func.AuthLevel.ANONYMOUS)
+print("DFAPP CREATED")
 
+print("REGISTERING HTTP STARTER")
 @app.route(route="orchestrators/my_orchestrator", methods=["POST"])
 @app.durable_client_input(client_name="client")
 async def http_starter(req: func.HttpRequest, client: df.DurableOrchestrationClient):
@@ -11,18 +15,14 @@ async def http_starter(req: func.HttpRequest, client: df.DurableOrchestrationCli
     instance_id = await client.start_new("my_orchestrator", client_input=order)
     return client.create_check_status_response(req, instance_id)
 
+print("REGISTERING ORCHESTRATOR")
 @app.orchestration_trigger(context_name="context")
 def my_orchestrator(context: df.DurableOrchestrationContext):
-    # TODO: Implement the orchestrator
-    # 1. Get the input order
-    # 2. Call validate_activity with the order
-    # 3. If invalid, return {"status": "rejected", "reason": <reason>}
-    # 4. If valid, call report_activity with the order
-    # 5. Return {"status": "completed", "report_url": <report_url>}
-
-
+    
     order = context.get_input()
+    print("ORCHESTRATOR STARTED")
 
+    print("CALLING VALIDATE")
     validation = yield context.call_activity("validate_activity", order)
 
     if not validation.get("valid"):
@@ -31,6 +31,7 @@ def my_orchestrator(context: df.DurableOrchestrationContext):
             "reason": validation.get("reason", "unknown")
         }
 
+    print("CALLING REPORT")
     report_url = yield context.call_activity("report_activity", order)
 
     return {
@@ -39,15 +40,11 @@ def my_orchestrator(context: df.DurableOrchestrationContext):
     }
     
 
+print("REGISTERING VALIDATE ACTIVITY")
 @app.activity_trigger(input_name="order")
 def validate_activity(order: dict) -> dict:
-    # TODO: Implement the validate activity
-    # 1. Get VALIDATE_URL from environment variables
-    # 2. Make a POST request to VALIDATE_URL with the order as JSON
-    # 3. Raise an exception if the request fails (r.raise_for_status())
-    # 4. Return the parsed JSON response
-
-
+    
+    print("VALIDATE ACTIVITY EXECUTED")
     url = os.environ.get("VALIDATE_URL")
 
     r = requests.post(url, json=order)
@@ -55,8 +52,10 @@ def validate_activity(order: dict) -> dict:
 
     return r.json()
 
+print("REGISTERING REPORT ACTIVITY")
 @app.activity_trigger(input_name="order")
 def report_activity(order: dict) -> str:
+    print("REPORT ACTIVITY EXECUTED")
     from azure.mgmt.containerinstance import ContainerInstanceManagementClient
     from azure.mgmt.containerinstance.models import (
         ContainerGroup, Container, ResourceRequirements, ResourceRequests,
@@ -76,10 +75,7 @@ def report_activity(order: dict) -> str:
     # Construct the Managed Identity Resource ID
     rollnum = rg.split("-")[-1]
     mi_id = f"/subscriptions/{sub_id}/resourcegroups/{rg}/providers/Microsoft.ManagedIdentity/userAssignedIdentities/mi-pa4-{rollnum}"
-    
-    # TODO: Create the container group
-    # Replace the `None` values below with the correct properties.
-    # Hint: Follow the structure shown in the skeleton.
+   
     
     group = ContainerGroup(
         location=loc,
@@ -126,4 +122,3 @@ def report_activity(order: dict) -> str:
     client.container_groups.begin_delete(rg, name)
 
     return f"{os.environ['STORAGE_ACCOUNT_URL'].rstrip('/')}/reports/{order_id}.pdf"
-    
