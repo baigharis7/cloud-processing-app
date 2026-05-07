@@ -279,4 +279,33 @@ One major issue encountered was Azure Storage authentication failure after deplo
 
 Another issue occurred when the original frontend Web App was unintentionally overwritten during Function App deployment because both services initially used the same naming convention. This caused the frontend UI to disappear even though the backend services continued functioning correctly. The problem was resolved by creating a separate frontend Web App and reconnecting the original GitHub Actions deployment workflow.
 
----
+### Final Notes
+During the implementation of this assignment, several deployment and infrastructure issues were encountered which significantly increased debugging time. One of the major problems occurred during Function App deployment when the original frontend App Service was accidentally overwritten because both the frontend and Function App initially used the same naming convention. This caused the TaskFlow UI to disappear even though backend services were still functioning correctly. To resolve this, a separate frontend Web App (`pa4web-27100205`) was recreated and connected again through GitHub Actions deployment.
+
+Another major issue involved Azure Storage authentication for Durable Functions. The subscription policies blocked Shared Key authentication, causing repeated 401, 403, and runtime startup failures. The Function App could not access its storage account correctly until the configuration was migrated to Managed Identity-based authentication using `AzureWebJobsStorage__accountName`, `AzureWebJobsStorage__credential`, and `AzureWebJobsStorage__clientId`. This required recreating parts of the deployment multiple times before the orchestration pipeline became stable.
+
+We also encountered Durable Function replay and non-deterministic orchestration errors after modifying orchestrator logic during testing. These were resolved by restarting the Function App and creating fresh orchestration instances instead of replaying older failed instances. Additional deployment issues were caused by GitHub Actions workflows, publish profile authentication, unsupported runtime versions, and deployment-center misconfigurations. These issues required rebuilding and redeploying certain services multiple times throughout the assignment.
+
+Some screenshots in the submission may show slightly different resource names or timestamps because parts of the infrastructure were recreated during debugging and recovery attempts. However, all screenshots belong to the same final resource group and represent the same architecture and deployment workflow used for the completed solution.
+
+
+### Resource Names
+Final Resource Group: rg-sp26-27100205
+
+Frontend Web App: pa4web-27100205
+Function App (Durable Functions): pa4-27100205
+App Service Plan: pa4-27100205
+AKS Cluster: pa4-27100205
+Azure Container Registry (ACR): pa427100205
+Primary Storage Account (Blob Reports): stpa427100205
+Function Runtime Storage Account: stfunc27100205
+Managed Identity: mi-pa4-27100205
+
+Container Images:
+validate-api:v1
+report-job:v1
+func-app:v5
+
+GitHub Repository:
+https://github.com/baigharis7/cloud-processing-app
+
